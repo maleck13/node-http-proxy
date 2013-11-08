@@ -1,7 +1,7 @@
 /*
-  latent-proxy.js: Example of proxying over HTTP with latency
+  gzip-middleware-proxytable.js: Basic example of `connect-gzip` middleware in node-http-proxy
 
-  Copyright (c) 2010 Charlie Robbins, Mikeal Rogers, Fedor Indutny, & Marak Squires.
+  Copyright (c) 2010 Charlie Robbins, Mikeal Rogers, Fedor Indutny, Marak Squires, & Dominic Tarr.
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -30,18 +30,16 @@ var util = require('util'),
     httpProxy = require('../../lib/node-http-proxy');
 
 //
-// Http Proxy Server with Latency
+// Basic Http Proxy Server
 //
-httpProxy.createServer(function (req, res, proxy) {
-  var buffer = httpProxy.buffer(req);
-  setTimeout(function () {
-    proxy.proxyRequest(req, res, {
-      port: 9000,
-      host: 'localhost',
-      buffer: buffer
-    });
-  }, 200);
-}).listen(8002);
+httpProxy.createServer(
+  require('connect-gzip').gzip({ matchType: /.?/ }),
+  {
+    router: {
+      "localhost/fun": "localhost:9000"
+    }
+  }
+).listen(8000);
 
 //
 // Target Http Server
@@ -52,5 +50,5 @@ http.createServer(function (req, res) {
   res.end();
 }).listen(9000);
 
-util.puts('http proxy server '.blue + 'started '.green.bold + 'on port '.blue + '8002 '.yellow + 'with latency'.magenta.underline);
+util.puts('http proxy server'.blue + ' started '.green.bold + 'on port '.blue + '8000'.yellow);
 util.puts('http server '.blue + 'started '.green.bold + 'on port '.blue + '9000 '.yellow);
